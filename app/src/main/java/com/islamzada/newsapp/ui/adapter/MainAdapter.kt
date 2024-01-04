@@ -3,6 +3,7 @@ package com.islamzada.newsapp.ui.adapter
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.provider.Settings.Global.getString
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -11,6 +12,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.Toast
+import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -31,41 +34,20 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
         RecyclerView.ViewHolder(binding.root) {
 
         init {
-            // Tüm öğeyi tıklama dinleyicisi ekle
-            binding.root.setOnClickListener {
-                val position = adapterPosition
-                if (position != RecyclerView.NO_POSITION) {
-                    val url = filteredList[position].url
-                    openUrlInBrowser(url)
-                }
-            }
-
-            // newsUrl TextView'e tıklama olayı ekle
+            // "Read More" TextView'ına tıklama olayı ekle
             binding.newsUrl.setOnClickListener {
                 val position = adapterPosition
                 if (position != RecyclerView.NO_POSITION) {
+                    // "Read More" TextView'sına tıklandığında URL'yi aç
                     val url = filteredList[position].url
                     openUrlInBrowser(url)
                 }
             }
 
-            // "To be continue" metni içindeki tıklanabilir bağlantıyı oluştur
-            val spannableString = SpannableString("Click to Read More")
-            val clickableSpan = object : ClickableSpan() {
-                override fun onClick(widget: View) {
-                    // "To be continue" metnine tıklandığında URL'yi aç
-                    val position = adapterPosition
-                    if (position != RecyclerView.NO_POSITION) {
-                        val url = filteredList[position].url
-                        openUrlInBrowser(url)
-                    }
-                }
+            binding.imageFav.setOnClickListener{
+                Toast.makeText(context, "Add to Favorite", Toast.LENGTH_SHORT).show()
             }
-            spannableString.setSpan(clickableSpan, 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
 
-            // TextView'a tıklanabilir bağlantıyı ayarla
-            binding.newsUrl.text = spannableString
-            binding.newsUrl.movementMethod = LinkMovementMethod.getInstance()
         }
 
         // Verileri ViewHolder'a atayan fonksiyon
@@ -75,6 +57,22 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
                 newsTitle.text = data.title
                 newsDescription.text = shortenString(data.description)
                 loadImage(data.imageUrl, newsImage)
+
+                // "Read More" yazısını güncelle
+                val spannableString = SpannableString("Click to Read More")
+                val clickableSpan = object : ClickableSpan() {
+                    override fun onClick(widget: View) {
+                        // "Read More" TextView'sına tıklandığında URL'yi aç
+                        val position = adapterPosition
+                        if (position != RecyclerView.NO_POSITION) {
+                            val url = filteredList[position].url
+                            openUrlInBrowser(url)
+                        }
+                    }
+                }
+                spannableString.setSpan(clickableSpan, 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                newsUrl.text = spannableString
+                newsUrl.movementMethod = LinkMovementMethod.getInstance()
             }
         }
     }
@@ -168,4 +166,5 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
         context.startActivity(intent)
     }
 }
+
 
