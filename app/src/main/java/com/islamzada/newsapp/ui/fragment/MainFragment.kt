@@ -11,7 +11,7 @@ import androidx.fragment.app.viewModels
 import com.islamzada.newsapp.databinding.FragmentMainBinding
 import com.islamzada.newsapp.ui.adapter.MainAdapter
 import com.islamzada.newsapp.ui.viewModel.MainViewModel
-import com.islamzada.newsapp.utils.MyResponse
+import com.islamzada.newsapp.utils.MyResponse.Status
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -48,14 +48,14 @@ class MainFragment : Fragment() {
     private fun observeNewsData() {
         viewModel.newsData.observe(viewLifecycleOwner) { response ->
             when (response.status) {
-                MyResponse.Status.LOADING -> {
+                Status.LOADING -> {
                     binding.loading.visibility = View.VISIBLE
                 }
-                MyResponse.Status.SUCCESS -> {
+                Status.SUCCESS -> {
                     binding.loading.visibility = View.GONE
                     response.data?.articles?.let { newsAdapter.submitData(it) }
                 }
-                MyResponse.Status.ERROR -> {
+                Status.ERROR -> {
                     binding.loading.visibility = View.GONE
                     Toast.makeText(requireContext(), response.message, Toast.LENGTH_SHORT).show()
                 }
