@@ -1,7 +1,14 @@
 package com.islamzada.newsapp.ui.adapter
 
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.DiffUtil
@@ -17,10 +24,49 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
     RecyclerView.Adapter<MainAdapter.MyViewHolder>() {
 
     private var newsList = emptyList<Article>()
+    private var filteredList = emptyList<Article>()
 
     // Inner class: RecyclerView.ViewHolder'ın özelleştirilmiş sürümü
     inner class MyViewHolder(private val binding: ItemNewsBinding) :
         RecyclerView.ViewHolder(binding.root) {
+
+        init {
+            // Tüm öğeyi tıklama dinleyicisi ekle
+            binding.root.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val url = filteredList[position].url
+                    openUrlInBrowser(url)
+                }
+            }
+
+            // newsUrl TextView'e tıklama olayı ekle
+            binding.newsUrl.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val url = filteredList[position].url
+                    openUrlInBrowser(url)
+                }
+            }
+
+            // "To be continue" metni içindeki tıklanabilir bağlantıyı oluştur
+            val spannableString = SpannableString("Click to Read More")
+            val clickableSpan = object : ClickableSpan() {
+                override fun onClick(widget: View) {
+                    // "To be continue" metnine tıklandığında URL'yi aç
+                    val position = adapterPosition
+                    if (position != RecyclerView.NO_POSITION) {
+                        val url = filteredList[position].url
+                        openUrlInBrowser(url)
+                    }
+                }
+            }
+            spannableString.setSpan(clickableSpan, 0, spannableString.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+
+            // TextView'a tıklanabilir bağlantıyı ayarla
+            binding.newsUrl.text = spannableString
+            binding.newsUrl.movementMethod = LinkMovementMethod.getInstance()
+        }
 
         // Verileri ViewHolder'a atayan fonksiyon
         fun setData(data: Article) {
@@ -43,7 +89,7 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
 
     // Veri setinin boyutunu döndüren fonksiyon
     override fun getItemCount(): Int {
-        return newsList.size
+        return filteredList.size
     }
 
     // Belirli bir konumdaki öğenin türünü döndüren fonksiyon
@@ -53,14 +99,15 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
 
     // ViewHolder'ın içeriğini belirli bir konumdaki veriyle güncelleyen fonksiyon
     override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
-        holder.setData(newsList[position])
+        holder.setData(filteredList[position])
     }
 
     // Veri setini güncelleyen fonksiyon
     fun submitData(data: List<Article>) {
-        val newsDiffUtil = NewsDiffUtils(newsList, data)
+        val newsDiffUtil = NewsDiffUtils(filteredList, data)
         val diffUtils = DiffUtil.calculateDiff(newsDiffUtil)
         newsList = data
+        filteredList = data
         diffUtils.dispatchUpdatesTo(this)
     }
 
@@ -105,4 +152,20 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
         override fun areContentsTheSame(oldItemPosition: Int, newItemPosition: Int): Boolean =
             oldItems[oldItemPosition] == newItems[newItemPosition]
     }
+
+    // Filtreleme işlemi yapan fonksiyon
+    fun filterByName(name: String) {
+        filteredList = if (name.isEmpty()) {
+            newsList
+        } else {
+            newsList.filter { it.title!!.contains(name, true) }
+        }
+        notifyDataSetChanged()
+    }
+
+    private fun openUrlInBrowser(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        context.startActivity(intent)
+    }
 }
+
