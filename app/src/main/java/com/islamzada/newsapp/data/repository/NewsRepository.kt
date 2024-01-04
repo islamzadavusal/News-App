@@ -9,16 +9,23 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class NewsRepository @Inject constructor(private val api : ApiService)
-{
-    suspend fun lastNews() : Flow<MyResponse<NewsResponse>> = flow {
+class NewsRepository @Inject constructor(private val api: ApiService) {
+
+    // En son haberleri getiren fonksiyon
+    suspend fun lastNews(): Flow<MyResponse<NewsResponse>> = flow {
+        // Yükleniyor durumunu yayınla
         emit(MyResponse.loading())
-        val response = api.getTopHeadLines(TOKEN,"us")
+
+        // API'den en son başlıkları alma işlemi
+        val response = api.getTopHeadLines(TOKEN, "us")
+
+        // Başarılı bir cevap alındıysa başarı durumunu yayınla, aksi takdirde hata durumunu yayınla
         if (response.isSuccessful)
             emit(MyResponse.success(response.body()))
-        else emit(MyResponse.error("please try again later!"))
+        else
+            emit(MyResponse.error("Please try again later!"))
     }.catch {
+        // Hata durumunu yayınla
         emit(MyResponse.error(it.message.toString()))
     }
 }
-
