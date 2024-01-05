@@ -9,7 +9,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
-class NewsRepository @Inject constructor(private val api: ApiService) {
+interface NewsRepositoryInterface {
+
+
+}
+class NewsRepository @Inject constructor(private val api: ApiService) : NewsRepositoryInterface {
 
     // En son haberleri getiren fonksiyon
     suspend fun lastNews(): Flow<MyResponse<NewsResponse>> = flow {

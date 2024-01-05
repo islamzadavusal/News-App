@@ -17,18 +17,19 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.islamzada.newsapp.R
 import com.islamzada.newsapp.data.model.Article
+import com.islamzada.newsapp.data.model.NewsResponse
 import com.islamzada.newsapp.databinding.ItemNewsBinding
 import dagger.hilt.android.qualifiers.ActivityContext
 import javax.inject.Inject
 
-class MainAdapter @Inject constructor(@ActivityContext private val context: Context) :
+class MainAdapter (private val context: Context, var onFavIconClick: (Article) -> Unit) :
     RecyclerView.Adapter<MainAdapter.MyViewHolder>() {
 
     private var newsList = emptyList<Article>()
     private var filteredList = emptyList<Article>()
 
     // Inner class: RecyclerView.ViewHolder'ın özelleştirilmiş sürümü
-    inner class MyViewHolder(private val binding: ItemNewsBinding) :
+    inner class MyViewHolder(private val binding: ItemNewsBinding,var onFavIconClick: (Article) -> Unit) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
@@ -42,11 +43,17 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
                 }
             }
 
-            binding.imageFav.setOnClickListener{
-                Toast.makeText(context, "Add to Favorite", Toast.LENGTH_SHORT).show()
+            binding.imageFav.setOnClickListener {
+                val position = adapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val article = filteredList[position]
+                    onFavIconClick(article)
+                    Toast.makeText(context, "Add to Favorite", Toast.LENGTH_SHORT).show()
+                }
             }
-
         }
+
+
 
         // Verileri ViewHolder'a atayan fonksiyon
         fun setData(data: Article) {
@@ -80,7 +87,7 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
         // View oluşturucu
         val inflater = LayoutInflater.from(context)
         val binding = ItemNewsBinding.inflate(inflater, parent, false)
-        return MyViewHolder(binding)
+        return MyViewHolder(binding, onFavIconClick)
     }
 
     // Veri setinin boyutunu döndüren fonksiyon

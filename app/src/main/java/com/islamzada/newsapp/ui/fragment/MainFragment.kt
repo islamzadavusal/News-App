@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.fragment.app.viewModels
+import com.islamzada.newsapp.data.model.Favorite
 import com.islamzada.newsapp.databinding.FragmentMainBinding
 import com.islamzada.newsapp.ui.adapter.MainAdapter
 import com.islamzada.newsapp.ui.viewModel.MainViewModel
@@ -23,8 +24,7 @@ class MainFragment : Fragment() {
     private lateinit var binding: FragmentMainBinding
     private val viewModel: MainViewModel by viewModels()
 
-    @Inject
-    lateinit var newsAdapter: MainAdapter
+    private lateinit var newsAdapter: MainAdapter
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -32,6 +32,12 @@ class MainFragment : Fragment() {
     ): View {
 
         binding = FragmentMainBinding.inflate(inflater, container, false)
+
+        // Initialize the newsAdapter
+        newsAdapter = MainAdapter(requireContext()) { article ->
+            val favorite = Favorite(0, article.title,article.description,article.url,article.imageUrl) // Adjust accordingly
+            viewModel.insertToFav(favorite)
+        }
 
         binding.editTextSearchMain.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
@@ -45,7 +51,6 @@ class MainFragment : Fragment() {
 
         return binding.root
     }
-
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -79,9 +84,11 @@ class MainFragment : Fragment() {
 
     private fun setupViews() {
         binding.recyclerview.apply {
-            layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+            layoutManager =
+                LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
             adapter = newsAdapter
         }
     }
 }
+
 
