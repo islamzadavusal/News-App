@@ -11,6 +11,7 @@ import kotlinx.parcelize.Parcelize
 data class Favorite (
     @PrimaryKey(autoGenerate = true) val id: Int,
     @ColumnInfo(name = "title") val title: String,
+    @ColumnInfo(name = "description") val description: String,
     @ColumnInfo(name = "url") val url: String,
     @ColumnInfo(name = "imageUrl") val imageUrl: String) : Parcelable {
 }

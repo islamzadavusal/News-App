@@ -1,13 +1,18 @@
 package com.islamzada.newsapp.di
 
+import android.content.Context
+import androidx.room.Room
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.islamzada.newsapp.data.database.FavoriteDatabase
 import com.islamzada.newsapp.data.server.ApiService
+import com.islamzada.newsapp.data.server.AppDao
 import com.islamzada.newsapp.utils.BASE_URL
 import com.islamzada.newsapp.utils.TIMEOUT_TIME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
@@ -18,6 +23,23 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
+
+    @Provides
+    @Singleton
+    fun provideFavoriteDatabase(@ApplicationContext context: Context): FavoriteDatabase {
+        return Room.databaseBuilder(
+            context.applicationContext,
+            FavoriteDatabase::class.java,
+            "favorite_database"
+        ).build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideFavoriteDao(favoriteDatabase: FavoriteDatabase): AppDao {
+        return favoriteDatabase.appDao()
+    }
+
 
     // Base URL'yi sağlayan fonksiyon
     @Provides
