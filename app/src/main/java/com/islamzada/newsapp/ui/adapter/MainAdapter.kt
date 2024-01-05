@@ -3,7 +3,6 @@ package com.islamzada.newsapp.ui.adapter
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.provider.Settings.Global.getString
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
@@ -13,7 +12,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -156,7 +154,7 @@ class MainAdapter @Inject constructor(@ActivityContext private val context: Cont
         filteredList = if (name.isEmpty()) {
             newsList
         } else {
-            newsList.filter { it.title!!.contains(name, true) }
+            newsList.filter { it.title.contains(name, true) }
         }
         notifyDataSetChanged()
     }
